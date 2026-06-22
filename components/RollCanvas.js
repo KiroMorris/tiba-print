@@ -327,31 +327,40 @@ function settleTight(box, others, rollWcm, gap) {
     return snapAlign({ x, y, w: box.w, h: box.h }, others, rollWcm, gap);
   }
 
-  // Overlapping: compute the minimal push to clear each obstacle in each of the
-  // 4 directions, then take the smallest total move that ends up fully clear.
+  // Overlapping: find the closest spot to the drop point that fully clears.
+  // We test a rich set of candidate (x, y) pairs built from neighbor edges, so a
+  // block can slot into an interior GAP between blocks (flush-x of a left/right
+  // neighbor AND aligned to a row's y), not just fall straight down.
   const candidates = [];
   const tryPos = (nx, ny) => {
     nx = Math.max(0, Math.min(nx, rollWcm - box.w));
     ny = Math.max(0, ny);
     if (!clashes({ x: nx, y: ny, w: box.w, h: box.h }, others, gap)) {
-      const dist = Math.hypot(nx - x, ny - y);
-      candidates.push({ x: nx, y: ny, dist });
+      candidates.push({ x: nx, y: ny, dist: Math.hypot(nx - x, ny - y) });
     }
   };
-  // For every obstacle, the four flush positions just outside its edges.
+
+  // Build candidate X edges (just left/right of every block, plus the drop x and
+  // roll edges) and Y edges (top/bottom of every block, row tops, drop y, top).
+  const xEdges = new Set([x, 0, rollWcm - box.w]);
+  const yEdges = new Set([y, 0]);
   for (const o of others) {
-    tryPos(o.x_cm - box.w - gap, y);          // left of it
-    tryPos(o.x_cm + o.w_cm + gap, y);          // right of it
-    tryPos(x, o.y_cm - box.h - gap);           // above it
-    tryPos(x, o.y_cm + o.h_cm + gap);          // below it
+    xEdges.add(o.x_cm + o.w_cm + gap); // flush to its right (= a gap slot)
+    xEdges.add(o.x_cm - box.w - gap);  // flush to its left
+    yEdges.add(o.y_cm);                 // align with its top (sit in the row)
+    yEdges.add(o.y_cm + o.h_cm + gap);  // below it
+    yEdges.add(o.y_cm - box.h - gap);   // above it
   }
-  // Also the pure gravity-down fallback (guarantees at least one solution).
+  // Cross every x edge with every y edge — this surfaces true gap-fits.
+  for (const ex of xEdges) for (const ey of yEdges) tryPos(ex, ey);
+
+  // Pure gravity-down fallback so there's always at least one valid spot.
   const gd = resolveCollision({ x, y, w: box.w, h: box.h }, others, rollWcm, gap);
   candidates.push({ x: gd.x, y: gd.y, dist: Math.hypot(gd.x - x, gd.y - y) });
 
   candidates.sort((a, b) => a.dist - b.dist);
   const best = candidates[0];
-  return snapAlign({ x: best.x, y: best.y, w: box.w, h: box.h }, others, rollWcm, gap);
+  return { x: +best.x.toFixed(3), y: +best.y.toFixed(3) };
 }
 
 // Gently snap a clear box to nearby neighbor/roll edges so it sits flush —
