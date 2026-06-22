@@ -15,26 +15,32 @@ echo "  🐢  Tiba Print — DTF Layout & Nesting"
 echo "  ─────────────────────────────────────"
 echo ""
 
-# 1) Check Node.js — and install it automatically if missing.
+# 1) Check Node.js — and install it automatically if missing, using the OFFICIAL
+#    Node.js .pkg installer (no Homebrew needed; works on Apple Silicon & Intel).
 if ! command -v node >/dev/null 2>&1; then
-  echo "  ⏳  Node.js not found — installing it for you..."
+  echo "  ⏳  Node.js not found — installing it for you (official installer)..."
+  echo "      You'll be asked for your Mac password — type it and press Enter."
   echo ""
 
-  if command -v brew >/dev/null 2>&1; then
-    # Homebrew is already here — just install Node.
-    brew install node
-  else
-    # No Homebrew. Install Homebrew (the standard Mac package manager) first,
-    # then Node. This may ask for your Mac password (for the installer).
-    echo "  ⏳  Installing Homebrew (Mac package manager) — you may be asked for your password..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" </dev/null
+  NODE_VER="v22.11.0"
+  ARCH="$(uname -m)" # arm64 (Apple Silicon) or x86_64 (Intel)
+  if [ "$ARCH" = "arm64" ]; then PKG="node-${NODE_VER}.pkg"; else PKG="node-${NODE_VER}.pkg"; fi
+  PKG_URL="https://nodejs.org/dist/${NODE_VER}/${PKG}"
+  TMP_PKG="/tmp/${PKG}"
 
-    # Make brew available on this session (Apple Silicon vs Intel paths).
-    if [ -x /opt/homebrew/bin/brew ]; then eval "$(/opt/homebrew/bin/brew shellenv)"
-    elif [ -x /usr/local/bin/brew ]; then eval "$(/usr/local/bin/brew shellenv)"; fi
+  echo "  ⏳  Downloading Node.js ${NODE_VER}..."
+  curl -fL "$PKG_URL" -o "$TMP_PKG" || {
+    echo "  ❌  Download failed. Check your internet, or install manually from https://nodejs.org (LTS)."
+    read -p "  Press Enter to close..."
+    exit 1
+  }
 
-    brew install node
-  fi
+  echo "  ⏳  Installing (enter your Mac password if prompted)..."
+  sudo installer -pkg "$TMP_PKG" -target /
+  rm -f "$TMP_PKG"
+
+  # Make sure the new node is on PATH for this session.
+  export PATH="/usr/local/bin:$PATH"
 
   # Re-check.
   if ! command -v node >/dev/null 2>&1; then
