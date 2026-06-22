@@ -10,6 +10,11 @@
 # Move into this script's folder no matter where it's launched from.
 cd "$(dirname "$0")" || exit 1
 
+# Self-heal: ZIP downloads strip the execute bit and add a quarantine flag.
+# Re-apply +x to ourself and clear quarantine so future double-clicks work.
+chmod +x "$0" 2>/dev/null
+xattr -d com.apple.quarantine "$0" 2>/dev/null
+
 echo ""
 echo "  🐢  Tiba Print — DTF Layout & Nesting"
 echo "  ─────────────────────────────────────"

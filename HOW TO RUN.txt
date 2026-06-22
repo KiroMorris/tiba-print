@@ -8,16 +8,26 @@ including Node.js itself if you don't have it. Just double-click and wait.
  https://nodejs.org — pick the "LTS" version — then run the launcher again.)
 
 
-▶  ON MAC
----------
-1. Double-click:  "Start Tiba Print.command"
-2. The first time, it installs everything (a few minutes) — just wait.
-3. Your browser opens to the app automatically.
-4. Keep the black Terminal window open while you use the app.
-   Close it to stop the app.
+▶  ON MAC  (important — read this!)
+-----------------------------------
+The FIRST time, do NOT just double-click. Instead:
 
-   ⚠️  If Mac says it "can't be opened because it's from an unidentified
-       developer": right-click the file → Open → Open. (Only needed once.)
+   1. RIGHT-CLICK  (or hold Control and click)  on  "Start Tiba Print.command"
+   2. Choose  "Open"
+   3. If a warning appears, click  "Open"  again.
+
+   That's it — it runs. (Plain double-click is blocked by macOS the first
+   time because the file came from the internet. Right-click → Open is the
+   one-time unlock.)
+
+After that first time, a normal DOUBLE-CLICK works forever.
+
+What happens when it runs:
+   • First run installs everything (Node.js + dependencies) — a few minutes.
+   • It may ask for your Mac password (to install Node) — type it, press Enter.
+     (The password stays invisible as you type — that's normal.)
+   • Your browser opens to the app automatically.
+   • Keep the black Terminal window open while using the app. Close it to stop.
 
 
 ▶  ON WINDOWS
