@@ -1,4 +1,4 @@
-import { listDesigns, insertDesign, ensureBrand } from '@/lib/designs';
+import { listDesigns, insertDesign, ensureBrand, clearAllDesigns } from '@/lib/designs';
 import { ingestFile } from '@/lib/ingest';
 
 export const runtime = 'nodejs';
@@ -6,6 +6,12 @@ export const runtime = 'nodejs';
 // GET /api/designs — list all designs (with brand name).
 export async function GET() {
   return Response.json({ designs: listDesigns() });
+}
+
+// DELETE /api/designs — clear the ENTIRE library (all designs + brands).
+export async function DELETE() {
+  clearAllDesigns();
+  return Response.json({ designs: [] });
 }
 
 // POST /api/designs — multipart upload of one or more files.

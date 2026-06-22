@@ -21,6 +21,13 @@ export default function LibraryPanel({ onDesignsChange, onAddToJob }) {
     refresh();
   }, [refresh]);
 
+  const clearAll = useCallback(async () => {
+    if (designs.length === 0) return;
+    if (!confirm(`Delete ALL ${designs.length} designs from the library? This can't be undone.`)) return;
+    await fetch('/api/designs', { method: 'DELETE' });
+    await refresh();
+  }, [designs.length, refresh]);
+
   const upload = useCallback(
     async (fileList) => {
       const files = Array.from(fileList).filter((f) => f.size > 0);
@@ -66,7 +73,18 @@ export default function LibraryPanel({ onDesignsChange, onAddToJob }) {
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-edge px-3 py-2">
         <h2 className="font-heading text-base text-accent">Library</h2>
-        <span className="text-[11px] text-muted">{designs.length} designs</span>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] text-muted">{designs.length} designs</span>
+          {designs.length > 0 && (
+            <button
+              onClick={clearAll}
+              className="rounded border border-red-500/40 px-2 py-0.5 text-[11px] text-red-400 hover:bg-red-500/10"
+              title="Delete all designs from the library"
+            >
+              Clear all
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Brand + import controls */}
