@@ -1,15 +1,33 @@
 'use client';
 
 export default function JobPanel({ job, settings }) {
-  const { items, pack, updateItem, removeItem, packing } = job;
+  const { items, pack, updateItem, removeItem, clearJob, packing } = job;
 
   const runPack = () => pack({ allow_rotate: settings.allowRotate });
+
+  const onClear = () => {
+    if (items.length === 0) return;
+    if (confirm('Clear this print job? This removes all designs from the layout (your library is untouched).')) {
+      clearJob();
+    }
+  };
 
   return (
     <div className="flex flex-col">
       <div className="flex items-center justify-between border-b border-edge px-3 py-2">
         <h2 className="font-heading text-base text-accent">Print Job</h2>
-        <span className="text-[11px] text-muted">{items.length} designs</span>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] text-muted">{items.length} designs</span>
+          {items.length > 0 && (
+            <button
+              onClick={onClear}
+              className="rounded border border-red-500/40 px-2 py-0.5 text-[11px] text-red-400 hover:bg-red-500/10"
+              title="Remove all designs from this job"
+            >
+              Clear
+            </button>
+          )}
+        </div>
       </div>
 
       {items.length === 0 ? (
