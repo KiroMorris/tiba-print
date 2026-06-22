@@ -257,7 +257,13 @@ export default function RollCanvas({ settings, job }) {
           </div>
           <div className="text-muted">
             {hover.it.rotated ? '⟳ rotated 90°' : 'upright'}
+            {hover.it.src_dpi ? ` · ${hover.it.src_dpi} DPI` : ''}
           </div>
+          {hover.it.needs_enhance === 1 && (
+            <div className="mt-0.5 font-semibold text-amber-400">
+              ⚠ Low resolution — needs enhancing for sharp print
+            </div>
+          )}
           <div className="mt-0.5 text-[10px] text-muted/80">double-click to rotate</div>
         </div>
       )}
@@ -486,11 +492,23 @@ function DesignBlock({ it, scale, onDragEnd, onDblClick, onHover }) {
         fill={it.color}
         opacity={0.92}
         cornerRadius={2}
-        stroke="#0006"
-        strokeWidth={0.5}
+        // Low-DPI designs get a dashed amber outline so they stand out at a glance.
+        stroke={it.needs_enhance ? '#E0BE4A' : '#0006'}
+        strokeWidth={it.needs_enhance ? 2 : 0.5}
+        dash={it.needs_enhance ? [6, 4] : undefined}
       />
       {it.rotated && (
         <Text x={3} y={3} text="⟳" fontSize={fontSize + 2} fill={ink} opacity={0.95} />
+      )}
+      {it.needs_enhance === 1 && (
+        <Text
+          x={wPx - fontSize - 4}
+          y={3}
+          text="⚠"
+          fontSize={fontSize + 3}
+          fill="#E0BE4A"
+          opacity={0.95}
+        />
       )}
       {wPx > 30 && hPx > 14 && (
         <Text

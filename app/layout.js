@@ -21,9 +21,12 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  // suppressHydrationWarning: browser extensions (coupon/deals tools) inject
+  // attributes onto <html>/<body> after SSR, causing a harmless hydration
+  // mismatch. This tells React to ignore those extension-added differences.
   return (
-    <html lang="en" className={`${bagel.variable} ${prompt.variable}`}>
-      <body>{children}</body>
+    <html lang="en" className={`${bagel.variable} ${prompt.variable}`} suppressHydrationWarning>
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }

@@ -59,10 +59,21 @@ export default function DesignRow({ design, onChanged, onAddToJob }) {
           style={{ imageRendering: 'auto' }}
         />
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-xs text-gray-100">{design.name}</span>
+          <span className="block truncate text-xs text-gray-100">
+            {design.needs_enhance ? (
+              <span title="Low resolution — needs enhancing for a sharp print">⚠ </span>
+            ) : null}
+            {design.name}
+          </span>
           <span className="block text-[10px] text-muted">
             {design.phys_w_cm} × {design.phys_h_cm} cm · {design.file_type.toUpperCase()}
+            {design.src_dpi ? ` · ${design.src_dpi}dpi` : ''}
           </span>
+          {design.needs_enhance ? (
+            <span className="block text-[10px] font-semibold text-amber-400">
+              ⚠ Low res — enhance before printing
+            </span>
+          ) : null}
         </span>
         {onAddToJob && (
           <span
