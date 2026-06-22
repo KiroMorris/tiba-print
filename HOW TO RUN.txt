@@ -1,0 +1,39 @@
+🐢  TIBA PRINT — How to run
+============================
+
+The launcher installs EVERYTHING for you automatically the first time —
+including Node.js itself if you don't have it. Just double-click and wait.
+
+(If auto-install ever fails, you can install Node.js manually from
+ https://nodejs.org — pick the "LTS" version — then run the launcher again.)
+
+
+▶  ON MAC
+---------
+1. Double-click:  "Start Tiba Print.command"
+2. The first time, it installs everything (a few minutes) — just wait.
+3. Your browser opens to the app automatically.
+4. Keep the black Terminal window open while you use the app.
+   Close it to stop the app.
+
+   ⚠️  If Mac says it "can't be opened because it's from an unidentified
+       developer": right-click the file → Open → Open. (Only needed once.)
+
+
+▶  ON WINDOWS
+-------------
+1. Double-click:  "Start Tiba Print.bat"
+2. The first time, it installs everything (a few minutes) — just wait.
+3. Your browser opens to the app automatically.
+4. Keep the black window open while you use the app. Close it to stop.
+
+
+▶  EVERY TIME AFTER
+-------------------
+Same thing — double-click the launcher. If dependencies are already
+installed it skips straight to starting the app (a few seconds).
+
+If the browser doesn't open by itself, go to:  http://localhost:4040
+
+
+That's it. Drop your designs in, set sizes, Auto-pack, Export. 🎉
