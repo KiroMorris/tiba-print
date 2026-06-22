@@ -354,43 +354,50 @@ function settleTight(box, others, rollWcm, gap) {
   return snapAlign({ x: best.x, y: best.y, w: box.w, h: box.h }, others, rollWcm, gap);
 }
 
-// Magnetize a clear box tight against its neighbors: slide it LEFT until it
-// butts against the nearest design on its left (or the roll edge), then UP until
-// it butts against the nearest design above (or the top). This removes the
-// floating gap so a dropped design sits flush — but only moves it as far as the
-// first thing it touches, so it won't fly across an empty roll.
+// Gently snap a clear box to nearby neighbor/roll edges so it sits flush —
+// but ONLY when the edge is close (within SNAP cm). This kills hairline gaps
+// without yanking the box out of an interior pocket you intentionally dropped
+// it into. Each axis snaps to the nearest candidate edge within range.
 function snapAlign(box, others, rollWcm, gap) {
+  const SNAP = 2.5; // cm: only magnetize if a target edge is this close
   let { x, y } = box;
 
-  // Slide LEFT: the box can move left until its left edge hits the right edge of
-  // some design that vertically overlaps its row (plus gap), or x=0.
-  const slideLeftTo = (() => {
-    let limit = 0;
-    for (const o of others) {
-      const vOverlap = y < o.y_cm + o.h_cm + gap && y + box.h > o.y_cm - gap;
-      if (vOverlap && o.x_cm + o.w_cm <= x + 1e-6) {
-        limit = Math.max(limit, o.x_cm + o.w_cm + gap);
-      }
+  // Candidate X positions: flush-left against a neighbor's right edge, flush-
+  // right against a neighbor's left edge (for blocks that share the row), and 0.
+  const xTargets = [0];
+  const yTargets = [0];
+  for (const o of others) {
+    const vOverlap = y < o.y_cm + o.h_cm + gap && y + box.h > o.y_cm - gap;
+    if (vOverlap) {
+      xTargets.push(o.x_cm + o.w_cm + gap);          // sit to its right
+      xTargets.push(o.x_cm - box.w - gap);            // sit to its left
     }
-    return limit;
-  })();
-  x = +Math.max(0, slideLeftTo).toFixed(3);
-
-  // Slide UP: move up until the top edge hits the bottom of a design that now
-  // horizontally overlaps its column (plus gap), or y=0.
-  const slideUpTo = (() => {
-    let limit = 0;
-    for (const o of others) {
-      const hOverlap = x < o.x_cm + o.w_cm + gap && x + box.w > o.x_cm - gap;
-      if (hOverlap && o.y_cm + o.h_cm <= y + 1e-6) {
-        limit = Math.max(limit, o.y_cm + o.h_cm + gap);
-      }
+    const hOverlap = x < o.x_cm + o.w_cm + gap && x + box.w > o.x_cm - gap;
+    if (hOverlap) {
+      yTargets.push(o.y_cm + o.h_cm + gap);          // sit below it
+      yTargets.push(o.y_cm - box.h - gap);            // sit above it
+      yTargets.push(o.y_cm);                          // align tops
     }
-    return limit;
-  })();
-  y = +Math.max(0, slideUpTo).toFixed(3);
+  }
 
-  // Safety: if that introduced any overlap (rare numerical case), back off.
+  // Snap to the closest in-range X target that doesn't cause an overlap.
+  const nearestValid = (cur, targets, axis) => {
+    let bestVal = cur, bestD = SNAP + 1e-6;
+    for (const t of targets) {
+      if (t < -1e-6 || (axis === 'x' && t + box.w > rollWcm + 1e-6)) continue;
+      const d = Math.abs(cur - t);
+      if (d > SNAP || d >= bestD) continue;
+      const probe = axis === 'x'
+        ? { x: t, y, w: box.w, h: box.h }
+        : { x, y: t, w: box.w, h: box.h };
+      if (!clashes(probe, others, gap)) { bestVal = t; bestD = d; }
+    }
+    return bestVal;
+  };
+
+  x = +Math.max(0, nearestValid(x, xTargets, 'x')).toFixed(3);
+  y = +Math.max(0, nearestValid(y, yTargets, 'y')).toFixed(3);
+
   if (clashes({ x, y, w: box.w, h: box.h }, others, gap)) {
     return { x: +box.x.toFixed(3), y: +box.y.toFixed(3) };
   }
